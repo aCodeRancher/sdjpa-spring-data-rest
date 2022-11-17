@@ -2,10 +2,14 @@ package guru.springframework.sfgrestbrewery.bootstrap;
 
 import guru.springframework.sfgrestbrewery.domain.Beer;
 import guru.springframework.sfgrestbrewery.domain.BeerStyleEnum;
+import guru.springframework.sfgrestbrewery.domain.Customer;
 import guru.springframework.sfgrestbrewery.repositories.BeerRepository;
+import guru.springframework.sfgrestbrewery.repositories.CustomerRespository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -54,6 +58,8 @@ public class BeerLoader implements CommandLineRunner {
 
     private final BeerRepository beerRepository;
 
+    private final CustomerRespository customerRespository;
+
     @Override
     public void run(String... args) throws Exception {
         loadBeerObjects();
@@ -61,6 +67,11 @@ public class BeerLoader implements CommandLineRunner {
 
     private synchronized void loadBeerObjects() {
         log.debug("Loading initial data. Count is: {}", beerRepository.count() );
+
+
+
+        customerRespository.save(Customer.builder().name("Tom Smith").build());
+        customerRespository.save(Customer.builder().name("Tom Smith").build());
 
         if (beerRepository.count() == 0) {
 
@@ -307,6 +318,12 @@ public class BeerLoader implements CommandLineRunner {
                     .build());
 
             log.debug("Beer Records loaded: {}", beerRepository.count());
+
+           Page<Beer> foundBeer= beerRepository.findAllByBeerName("Mango Bobs", PageRequest.of(0,1));
+           Beer firstMangoBobs =  foundBeer.getContent().get(0);
+           firstMangoBobs.setBeerStyle(BeerStyleEnum.PALE_ALE);
+           beerRepository.saveAndFlush(firstMangoBobs);
+
         }
     }
 }
